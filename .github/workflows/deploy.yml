@@ -1,5 +1,5 @@
 name: Deploy to VM2
-#
+
 on:
   push:
     branches:
@@ -12,11 +12,16 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Setup SSH Key
+        run: |
+          echo "${{ secrets.VM2_SSH_KEY }}" | tr -d '\r' > key.pem
+          chmod 600 key.pem
+
       - name: Create hello.txt on VM2
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.VM2_IP }}
-          username: ${{ secrets.VM2_USER }}
+          username: azureuser
           key: ${{ secrets.VM2_SSH_KEY }}
           script: |
             echo "Hello, World!" > ~/hello.txt
