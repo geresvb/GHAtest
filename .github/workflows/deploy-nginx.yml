@@ -1,0 +1,30 @@
+name: Deploy Nginx with Docker Compose on VM2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup SSH Key
+        run: |
+          echo "${{ secrets.VM2_SSH_KEY }}" | tr -d '\r' > key.pem
+          chmod 600 key.pem
+
+      - name: Deploy Nginx with Docker Compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VM2_IP }}
+          username: azureuser
+          key: ${{ secrets.VM2_SSH_KEY }}
+          script: |
+            cd ~/github-runner-automation || git clone https://github.com/geresvb/GHAtest ~/github-runner-automation
+            cd ~/github-runner-automation
+            git pull origin main
+            docker-compose up -d
